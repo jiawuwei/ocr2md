@@ -39,15 +39,19 @@ A powerful OCR tool that converts various document formats to Markdown using adv
    # macOS (using Homebrew)
    brew install libreoffice
    brew install graphicsmagick
+   brew install poppler
    
    # Linux (Ubuntu/Debian)
    sudo apt-get install libreoffice
    sudo apt-get install graphicsmagick
+   sudo apt-get install poppler-utils
    
    # Windows
    # Download and install:
    # - LibreOffice: https://www.libreoffice.org/download/
    # - GraphicsMagick: http://www.graphicsmagick.org/download.html
+   # - Poppler: https://github.com/oschwartz10612/poppler-windows/releases/
+   #   After downloading Poppler, add its 'bin' directory to your system PATH
    ```
 
 3. Create virtual environment
@@ -106,6 +110,7 @@ vendors:
 - Python 3.8 or higher
 - LibreOffice
 - GraphicsMagick
+- Poppler (PDF processing and text extraction)
 - Required Python packages listed in `requirements.txt`
 
 ## License
