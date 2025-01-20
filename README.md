@@ -2,9 +2,9 @@
 
 A powerful OCR tool that converts various document formats to Markdown using advanced AI models. OCR2MD combines intelligent text recognition with Markdown formatting, making it easy to transform your documents while preserving their original structure.
 
-![alt text](images/image.png)
-![before convert](image.png)
-![after convert](image-1.png)
+![app](images/image.png)
+![before convert](images/image2.png)
+![after convert](images/image-1.png)
 ## Features
 
 - **Multiple Format Support**
