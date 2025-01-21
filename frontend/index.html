@@ -29,7 +29,6 @@
         .preview-container {
             height: calc(100vh - 180px);
             overflow-y: auto;
-            background-color: white;
         }
         body {
             height: 100vh;
@@ -116,11 +115,14 @@
         }
         #pdf-preview {
             width: 100%;
-            height: 500px;
+            height: calc(100vh - 280px);
             overflow: auto;
             background-color: #f3f4f6;
             border-radius: 8px;
-            position: relative;
+        }
+        .preview-column {
+            height: calc(100vh - 280px);
+            overflow: hidden;
         }
         #pdf-canvas {
             display: block;
@@ -251,32 +253,29 @@
                 <!-- Preview Area -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column: PDF Preview -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div id="pdf-preview" class="border-2 border-gray-300 rounded-lg flex flex-col h-[calc(100vh-280px)]">
-                            <!-- PDF Navigation -->
-                            <div class="bg-white border-b border-gray-200 p-2 flex justify-between items-center">
-                                <div class="flex items-center space-x-2">
-                                    <button @click="prevPage" :disabled="currentPage <= 1" 
-                                            class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50">
-                                        <i class="mdi mdi-chevron-left"></i>
-                                    </button>
-                                    <span class="text-sm">第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
-                                    <button @click="nextPage" :disabled="currentPage >= totalPages" 
-                                            class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50">
-                                        <i class="mdi mdi-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="preview-column bg-white rounded-lg shadow-lg p-4 relative">
+                        <div id="pdf-preview" class="border border-gray-200">
                             <!-- PDF Content -->
-                            <div class="flex-1 overflow-auto p-4 bg-gray-50">
-                                <canvas id="pdf-canvas" class="mx-auto"></canvas>
-                            </div>
+                            <canvas id="pdf-canvas"></canvas>
+                        </div>
+                        
+                        <!-- Floating Navigation -->
+                        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/75 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-3 border border-gray-700">
+                            <button @click="prevPage" :disabled="currentPage <= 1" 
+                                    class="p-1 rounded-full hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                <i class="mdi mdi-chevron-left text-base"></i>
+                            </button>
+                            <span class="text-[10px] font-medium text-white">{{ currentPage }} / {{ totalPages }}</span>
+                            <button @click="nextPage" :disabled="currentPage >= totalPages" 
+                                    class="p-1 rounded-full hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                <i class="mdi mdi-chevron-right text-base"></i>
+                            </button>
                         </div>
                     </div>
 
                     <!-- Right Column: Markdown Preview -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="preview-container border rounded h-[calc(100vh-280px)] overflow-auto">
+                    <div class="preview-column bg-white rounded-lg shadow-lg p-4">
+                        <div class="h-full overflow-auto">
                             <div v-if="markdownContent" 
                                  class="markdown-body"
                                  v-html="markdownHtml">
