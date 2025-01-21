@@ -8,12 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/turndown/dist/turndown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <style>
         .preview-container {
-            height: 600px;
+            height: calc(100vh - 100px);
             overflow-y: auto;
             background-color: white;
         }
@@ -66,13 +68,67 @@
             color: #656d76;
             border-left: 0.25em solid #d0d7de;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .dropdown-content.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+        }
+        .dropdown-item i {
+            margin-right: 8px;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div id="app">
-        <div class="container mx-auto px-4 py-8">
-            <div class="max-w-6xl mx-auto">
-                <h1 class="text-3xl font-bold text-center mb-8">Document Converter</h1>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="min-h-screen">
+        <div class="container mx-auto px-2 py-4">
+            <div class="max-w-[98%] mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-3xl font-bold">Document Converter</h1>
+                    <!-- Export Dropdown -->
+                    <div class="dropdown" v-if="markdownContent">
+                        <button @click="toggleExportMenu" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center">
+                            <i class="mdi mdi-export mr-2"></i>
+                            导出
+                        </button>
+                        <div class="dropdown-content" :class="{ 'show': showExportMenu }">
+                            <div class="dropdown-item" @click="copyMarkdown">
+                                <i class="mdi mdi-content-copy"></i>
+                                复制 Markdown
+                            </div>
+                            <div class="dropdown-item" @click="downloadMarkdown">
+                                <i class="mdi mdi-download"></i>
+                                下载 Markdown
+                            </div>
+                            <div class="dropdown-item" @click="downloadWord">
+                                <i class="mdi mdi-microsoft-word"></i>
+                                导出为 Word
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column: Upload and Controls -->

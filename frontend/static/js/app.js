@@ -30,7 +30,9 @@ createApp({
             },
             showValidation: false,
             abortController: null,
-            markdownContent: ''  // 添加 markdown 内容
+            markdownContent: '',  // 添加 markdown 内容
+            showExportMenu: false,
+            copySuccess: false
         }
     },
     computed: {
@@ -215,6 +217,94 @@ createApp({
             if (this.abortController) {
                 this.abortController.abort()
             }
+        },
+        toggleExportMenu() {
+            this.showExportMenu = !this.showExportMenu
+            // 点击外部关闭菜单
+            if (this.showExportMenu) {
+                setTimeout(() => {
+                    const closeMenu = (e) => {
+                        if (!e.target.closest('.dropdown')) {
+                            this.showExportMenu = false
+                            document.removeEventListener('click', closeMenu)
+                        }
+                    }
+                    document.addEventListener('click', closeMenu)
+                }, 0)
+            }
+        },
+        async copyMarkdown() {
+            try {
+                await navigator.clipboard.writeText(this.markdownContent)
+                this.showExportMenu = false
+                this.copySuccess = true
+                this.error = null
+                // 显示临时成功消息
+                this.convertSuccess = true
+                setTimeout(() => {
+                    this.convertSuccess = false
+                }, 2000)
+            } catch (err) {
+                this.error = '复制失败，请重试'
+            }
+        },
+        downloadMarkdown() {
+            const blob = new Blob([this.markdownContent], { type: 'text/markdown' })
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${this.selectedFile.name.split('.')[0]}_converted.md`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+            this.showExportMenu = false
+        },
+        async downloadWord() {
+            try {
+                // 将 Markdown 转换为 HTML
+                const htmlContent = marked.parse(this.markdownContent);
+                
+                // 创建完整的 HTML 文档
+                const fullHtml = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Exported Document</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            pre { background-color: #f6f8fa; padding: 16px; white-space: pre-wrap; }
+                            code { background-color: #f6f8fa; padding: 2px 4px; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid #ddd; padding: 8px; }
+                            img { max-width: 100%; }
+                            blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 16px; }
+                        </style>
+                    </head>
+                    <body>
+                        ${htmlContent}
+                    </body>
+                    </html>
+                `;
+
+                // 创建 Blob
+                const blob = new Blob([fullHtml], {
+                    type: 'application/msword;charset=utf-8'
+                });
+
+                // 下载文件
+                const fileName = `${this.selectedFile.name.split('.')[0]}_converted.doc`;
+                saveAs(blob, fileName);
+                
+                this.showExportMenu = false;
+                this.convertSuccess = true;
+                setTimeout(() => {
+                    this.convertSuccess = false;
+                }, 2000);
+            } catch (err) {
+                console.error('Word export error:', err);
+                this.error = '导出Word失败：' + err.message;
+            }
         }
     },
     watch: {
@@ -236,5 +326,11 @@ createApp({
     },
     mounted() {
         this.loadModels()
+        // 点击 ESC 关闭导出菜单
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.showExportMenu) {
+                this.showExportMenu = false
+            }
+        })
     }
 }).mount('#app') 
