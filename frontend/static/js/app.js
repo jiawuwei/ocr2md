@@ -17,7 +17,8 @@ createApp({
                 model: null,
                 pages: null
             },
-            showValidation: false
+            showValidation: false,
+            abortController: null
         }
     },
     computed: {
@@ -128,6 +129,7 @@ createApp({
                 this.isConverting = true
                 this.error = null
                 this.convertSuccess = false
+                this.abortController = new AbortController()
 
                 const formData = new FormData()
                 formData.append('file', this.selectedFile)
@@ -145,7 +147,8 @@ createApp({
 
                 const response = await fetch('/api/convert', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: this.abortController.signal
                 })
 
                 console.log('Response status:', response.status)
@@ -176,15 +179,25 @@ createApp({
                     this.convertSuccess = false
                 }, 5000)
             } catch (error) {
-                this.error = error.message
+                if (error.name === 'AbortError') {
+                    this.error = '转换已停止'
+                } else {
+                    this.error = error.message
+                }
             } finally {
                 this.isConverting = false
+                this.abortController = null
             }
         },
         handleModelSelect(model) {
             this.selectedModel = model.model_id
             if (this.showValidation) {
                 this.updateValidationErrors()
+            }
+        },
+        stopConversion() {
+            if (this.abortController) {
+                this.abortController.abort()
             }
         }
     },

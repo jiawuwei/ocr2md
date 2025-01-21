@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -67,7 +67,8 @@ async def read_root():
 async def convert_file(
     file: UploadFile = File(...),
     model_id: str = Form(...),
-    pages: str = Form(None)
+    pages: str = Form(None),
+    request: Request = None
 ):
     """
     File conversion endpoint
@@ -81,6 +82,8 @@ async def convert_file(
         Converted Markdown file
     """
     logger.info(f"Starting file conversion - File: {file.filename}, Model: {model_id}, Pages: {pages}")
+    temp_input = None
+    
     try:
         # Validate model selection
         if not model_id:
@@ -101,6 +104,11 @@ async def convert_file(
             logger.warning("No file uploaded")
             raise HTTPException(status_code=400, detail="No file uploaded")
 
+        # Check if client is still connected
+        if await request.is_disconnected():
+            logger.warning("Client disconnected")
+            raise HTTPException(status_code=499, detail="Client disconnected")
+
         # Check file size (optional, adjust limit as needed)
         file_size = 0
         while chunk := await file.read(8192):
@@ -108,6 +116,10 @@ async def convert_file(
             if file_size > 50 * 1024 * 1024:  # 50MB limit
                 logger.warning(f"File too large: {file_size / (1024*1024):.2f}MB")
                 raise HTTPException(status_code=400, detail="File too large (max 50MB)")
+            # Check connection status periodically
+            if await request.is_disconnected():
+                logger.warning("Client disconnected during file upload")
+                raise HTTPException(status_code=499, detail="Client disconnected")
         await file.seek(0)
         logger.info(f"File size: {file_size / (1024*1024):.2f}MB")
 
@@ -136,6 +148,11 @@ async def convert_file(
                 logger.error(f"Invalid page format: {str(e)}")
                 raise HTTPException(status_code=400, detail=f"Invalid page format: {str(e)}")
 
+        # Check connection before starting conversion
+        if await request.is_disconnected():
+            logger.warning("Client disconnected before conversion")
+            raise HTTPException(status_code=499, detail="Client disconnected")
+
         # Convert file
         logger.info("Starting file conversion")
         success, result = await pdf_converter.convert_file(str(temp_input), pages=page_list)
@@ -148,6 +165,11 @@ async def convert_file(
         if not os.path.exists(result):
             logger.error("Conversion failed: output file not found")
             raise HTTPException(status_code=500, detail="Conversion failed: output file not found")
+
+        # Final connection check before sending response
+        if await request.is_disconnected():
+            logger.warning("Client disconnected before receiving result")
+            raise HTTPException(status_code=499, detail="Client disconnected")
 
         logger.info(f"Conversion successful, output file: {result}")
         # Return converted file
@@ -164,7 +186,7 @@ async def convert_file(
         raise HTTPException(status_code=500, detail=f"Conversion failed: {str(e)}")
     finally:
         # Cleanup temporary file
-        if 'temp_input' in locals() and temp_input.exists():
+        if temp_input and temp_input.exists():
             try:
                 temp_input.unlink()
                 logger.info(f"Cleaned up temporary file: {temp_input}")

@@ -206,6 +206,19 @@ class PDFConverterTool:
             # Check input file
             if not os.path.exists(input_path):
                 return False, "Input file not found"
+            
+            # 检查文件类型并在需要时转换为PDF
+            input_ext = os.path.splitext(input_path)[1].lower()
+            if input_ext != '.pdf':
+                print(f"Converting {input_ext} file to PDF")
+                try:
+                    pdf_path = await self.convert_to_pdf(input_path)
+                    if not pdf_path or not os.path.exists(pdf_path):
+                        return False, "Failed to convert file to PDF"
+                    input_path = pdf_path
+                    print(f"Successfully converted to PDF: {pdf_path}")
+                except Exception as e:
+                    return False, f"Failed to convert to PDF: {str(e)}"
                 
             # Get user's downloads directory
             output_dir = self.get_downloads_dir()
@@ -284,5 +297,13 @@ class PDFConverterTool:
                 return False, "API密钥无效或未设置"
             else:
                 return False, f"转换错误: {error_msg}"
+        finally:
+            # 清理临时生成的PDF文件
+            if 'pdf_path' in locals() and pdf_path != input_path:
+                try:
+                    os.remove(pdf_path)
+                    print(f"Cleaned up temporary PDF file: {pdf_path}")
+                except Exception as e:
+                    print(f"Failed to cleanup temporary PDF file: {str(e)}")
             
     
