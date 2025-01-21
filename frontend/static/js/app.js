@@ -1,5 +1,16 @@
 const { createApp } = Vue
 
+// 配置 marked
+marked.setOptions({
+    gfm: true, // GitHub 风格的 Markdown
+    breaks: true, // 允许回车换行
+    highlight: function(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+    },
+    langPrefix: 'hljs language-'
+})
+
 createApp({
     data() {
         return {
@@ -18,7 +29,8 @@ createApp({
                 pages: null
             },
             showValidation: false,
-            abortController: null
+            abortController: null,
+            markdownContent: ''  // 添加 markdown 内容
         }
     },
     computed: {
@@ -61,6 +73,15 @@ createApp({
                 }
             }
             return null
+        },
+        markdownHtml() {
+            if (!this.markdownContent) return ''
+            try {
+                return marked.parse(this.markdownContent)
+            } catch (e) {
+                console.error('Markdown parsing error:', e)
+                return '<div class="text-red-500">Error parsing markdown content</div>'
+            }
         }
     },
     methods: {
@@ -129,20 +150,14 @@ createApp({
                 this.isConverting = true
                 this.error = null
                 this.convertSuccess = false
+                this.markdownContent = ''  // 清空之前的内容
                 this.abortController = new AbortController()
 
                 const formData = new FormData()
                 formData.append('file', this.selectedFile)
-                console.log('Selected model before conversion:', this.selectedModel)
                 formData.append('model_id', this.selectedModel)
                 if (this.pages) {
                     formData.append('pages', this.pages)
-                }
-                
-                // 打印整个 FormData 内容
-                console.log('FormData contents:')
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1])
                 }
 
                 const response = await fetch('/api/convert', {
@@ -151,10 +166,8 @@ createApp({
                     signal: this.abortController.signal
                 })
 
-                console.log('Response status:', response.status)
                 if (!response.ok) {
                     const error = await response.json()
-                    console.error('Error response:', error)
                     throw new Error(error.detail || 'Conversion failed')
                 }
 
@@ -163,6 +176,7 @@ createApp({
                     throw new Error('Conversion failed: empty result')
                 }
 
+                // 保存文件
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
@@ -171,10 +185,12 @@ createApp({
                 a.click()
                 window.URL.revokeObjectURL(url)
                 document.body.removeChild(a)
+
+                // 显示预览
+                this.markdownContent = await blob.text()
                 
                 this.convertSuccess = true
                 this.showValidation = false
-                // Clear success message after 5 seconds
                 setTimeout(() => {
                     this.convertSuccess = false
                 }, 5000)
