@@ -132,29 +132,29 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gradient-to-br from-rose-50 to-indigo-50 min-h-screen text-gray-700">
     <div id="app" class="min-h-screen">
         <div class="container mx-auto px-2 py-4">
             <div class="max-w-[98%] mx-auto">
                 <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-3xl font-bold">Document Converter</h1>
+                    <h1 class="text-3xl font-bold text-gray-700">Document Converter</h1>
                     <!-- Export Dropdown -->
                     <div class="dropdown" v-if="markdownContent">
                         <button @click="toggleExportMenu" 
-                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center">
+                                class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 flex items-center shadow-sm">
                             <i class="mdi mdi-export mr-2"></i>
                             导出
                         </button>
-                        <div class="dropdown-content" :class="{ 'show': showExportMenu }">
-                            <div class="dropdown-item" @click="copyMarkdown">
+                        <div class="dropdown-content bg-white border border-gray-100 shadow-sm" :class="{ 'show': showExportMenu }">
+                            <div class="dropdown-item text-gray-600 hover:bg-gray-50" @click="copyMarkdown">
                                 <i class="mdi mdi-content-copy"></i>
                                 复制 Markdown
                             </div>
-                            <div class="dropdown-item" @click="downloadMarkdown">
+                            <div class="dropdown-item text-gray-600 hover:bg-gray-50" @click="downloadMarkdown">
                                 <i class="mdi mdi-download"></i>
                                 下载 Markdown
                             </div>
-                            <div class="dropdown-item" @click="downloadWord">
+                            <div class="dropdown-item text-gray-600 hover:bg-gray-50" @click="downloadWord">
                                 <i class="mdi mdi-microsoft-word"></i>
                                 导出为 Word
                             </div>
@@ -163,13 +163,13 @@
                 </div>
                 
                 <!-- Control Panel -->
-                <div class="control-panel">
+                <div class="control-panel bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm">
                     <!-- File Upload -->
                     <div>
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center h-[38px]"
+                        <div class="border-2 border-dashed border-gray-200 rounded-lg p-2 text-center h-[38px] bg-white/80"
                              @dragover.prevent
                              @drop.prevent="handleFileDrop"
-                             :class="{'border-blue-500': isDragging, 'border-red-300': validationErrors.file}"
+                             :class="{'border-indigo-400': isDragging, 'border-rose-300': validationErrors.file}"
                              @dragenter="isDragging = true"
                              @dragleave="isDragging = false">
                             <input type="file"
@@ -179,19 +179,19 @@
                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.xls,.xlsx,.ppt,.pptx,.html,.xml,.rtf">
                             <div v-if="!selectedFile" class="flex items-center justify-center h-full">
                                 <i class="mdi mdi-upload text-gray-400 mr-2"></i>
-                                <span class="text-sm text-gray-600">拖放文件或</span>
+                                <span class="text-sm text-gray-500">拖放文件或</span>
                                 <button @click="$refs.fileInput.click()"
-                                        class="ml-1 px-2 py-0.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                                        class="ml-1 px-2 py-0.5 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
                                     选择文件
                                 </button>
                             </div>
                             <div v-else class="flex items-center justify-between h-full px-2">
                                 <div class="flex items-center">
-                                    <i class="mdi mdi-file text-blue-500 mr-2"></i>
-                                    <span class="text-sm text-gray-700 truncate">{{ selectedFile.name }}</span>
+                                    <i class="mdi mdi-file text-indigo-400 mr-2"></i>
+                                    <span class="text-sm text-gray-600 truncate">{{ selectedFile.name }}</span>
                                 </div>
                                 <button @click="selectedFile = null"
-                                        class="text-red-500 hover:text-red-600">
+                                        class="text-rose-400 hover:text-rose-500">
                                     <i class="mdi mdi-close"></i>
                                 </button>
                             </div>
@@ -201,12 +201,12 @@
                     <!-- Model Selection -->
                     <div>
                         <select v-model="selectedModel" 
-                                :class="{'border-red-300 ring-red-200': validationErrors.model}"
-                                class="w-full h-[38px] px-3 border rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            <option value="">选择模型</option>
+                                :class="{'border-rose-300 ring-rose-200': validationErrors.model}"
+                                class="w-full h-[38px] px-3 border border-gray-200 rounded bg-white/80 text-gray-600 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400">
+                            <option value="" class="bg-white">选择模型</option>
                             <template v-for="vendor in models">
-                                <optgroup :label="vendor.vendor_name">
-                                    <option v-for="model in vendor.models" :key="model.model_id" :value="model.model_id">
+                                <optgroup :label="vendor.vendor_name" class="bg-white">
+                                    <option v-for="model in vendor.models" :key="model.model_id" :value="model.model_id" class="bg-white">
                                         {{ model.model_name }}
                                     </option>
                                 </optgroup>
@@ -219,8 +219,8 @@
                         <input type="text" 
                                v-model="pages" 
                                placeholder="页面选择（可选，例如: 1,2,3 或 1-5）" 
-                               :class="{'border-red-300 ring-red-200': validationErrors.pages}"
-                               class="w-full h-[38px] px-3 border rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                               :class="{'border-rose-300 ring-rose-200': validationErrors.pages}"
+                               class="w-full h-[38px] px-3 border border-gray-200 rounded bg-white/80 text-gray-600 placeholder-gray-400 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400">
                     </div>
 
                     <!-- Convert Button -->
@@ -228,12 +228,12 @@
                         <button v-if="!isConverting" 
                                 @click="convertFile" 
                                 :disabled="!canConvert" 
-                                class="w-full h-[38px] bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                                class="w-full h-[38px] bg-indigo-500 text-white rounded hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
                             <span>开始转换</span>
                         </button>
                         <button v-else 
                                 @click="stopConversion" 
-                                class="w-full h-[38px] bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center">
+                                class="w-full h-[38px] bg-rose-500 text-white rounded hover:bg-rose-600 flex items-center justify-center shadow-sm">
                             <i class="mdi mdi-loading mdi-spin mr-2"></i>
                             <span>停止转换</span>
                         </button>
@@ -241,11 +241,11 @@
                 </div>
 
                 <!-- Messages -->
-                <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-700 rounded flex items-center text-sm">
+                <div v-if="error" class="mb-4 p-3 bg-rose-50 text-rose-600 rounded flex items-center text-sm border border-rose-200">
                     <i class="mdi mdi-alert-circle mr-2"></i>
                     {{ error }}
                 </div>
-                <div v-if="convertSuccess" class="mb-4 p-3 bg-green-100 text-green-700 rounded flex items-center text-sm">
+                <div v-if="convertSuccess" class="mb-4 p-3 bg-emerald-50 text-emerald-600 rounded flex items-center text-sm border border-emerald-200">
                     <i class="mdi mdi-check-circle mr-2"></i>
                     转换成功！文件已下载。
                 </div>
@@ -253,34 +253,34 @@
                 <!-- Preview Area -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column: PDF Preview -->
-                    <div class="preview-column bg-white rounded-lg shadow-lg p-4 relative">
-                        <div id="pdf-preview" class="border border-gray-200">
+                    <div class="preview-column bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 relative border border-gray-100">
+                        <div id="pdf-preview" class="border border-gray-100 bg-gray-50/50">
                             <!-- PDF Content -->
                             <canvas id="pdf-canvas"></canvas>
                         </div>
                         
                         <!-- Floating Navigation -->
-                        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/75 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-3 border border-gray-700">
+                        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm flex items-center space-x-3 border border-gray-100">
                             <button @click="prevPage" :disabled="currentPage <= 1" 
-                                    class="p-1 rounded-full hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                    class="p-1 rounded-full hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent text-gray-600 text-xs">
                                 <i class="mdi mdi-chevron-left text-base"></i>
                             </button>
-                            <span class="text-[10px] font-medium text-white">{{ currentPage }} / {{ totalPages }}</span>
+                            <span class="text-[10px] font-medium text-gray-600">{{ currentPage }} / {{ totalPages }}</span>
                             <button @click="nextPage" :disabled="currentPage >= totalPages" 
-                                    class="p-1 rounded-full hover:bg-gray-800 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                    class="p-1 rounded-full hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent text-gray-600 text-xs">
                                 <i class="mdi mdi-chevron-right text-base"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- Right Column: Markdown Preview -->
-                    <div class="preview-column bg-white rounded-lg shadow-lg p-4">
+                    <div class="preview-column bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 border border-gray-100">
                         <div class="h-full overflow-auto">
                             <div v-if="markdownContent" 
                                  class="markdown-body"
                                  v-html="markdownHtml">
                             </div>
-                            <div v-else class="flex items-center justify-center h-full text-gray-500">
+                            <div v-else class="flex items-center justify-center h-full text-gray-400">
                                 <p>转换完成后在这里预览 Markdown 内容</p>
                             </div>
                         </div>
