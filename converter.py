@@ -41,16 +41,25 @@ class PDFConverterTool:
     def get_model_list(self):
         """Get list of available models"""
         try:
-            model_list = []
+            vendors_list = []
             for vendor in self.config.get("vendors", []):
                 vendor_name = vendor.get("name", "")
                 if vendor_name:
-                    model_list.append(f"───── {vendor_name} ─────")
+                    vendor_models = []
                     for model in vendor.get("models", []):
-                        name = model.get("name", "")
-                        if name:
-                            model_list.append(name)
-            return model_list
+                        model_name = model.get("name", "")
+                        model_id = model.get("model_id", "")
+                        if model_name and model_id:
+                            vendor_models.append({
+                                "model_name": model_name,
+                                "model_id": model_id
+                            })
+                    if vendor_models:
+                        vendors_list.append({
+                            "vendor_name": vendor_name,
+                            "models": vendor_models
+                        })
+            return vendors_list
         except Exception as e:
             print(f"Error getting model list: {str(e)}")
             return []
@@ -58,28 +67,43 @@ class PDFConverterTool:
     def set_current_model(self, model_id):
         """Set current model and update environment variables"""
         if not model_id:
+            print("No model_id provided")
             return False
             
         try:
+            print(f"Setting model_id: {model_id}")  # Debug log
+            model_id_lower = model_id.lower()
             for vendor in self.config.get("vendors", []):
                 for model in vendor.get("models", []):
-                    if model.get("model_id") == model_id:
-                        # Set environment variables
+                    config_model_id = model.get("model_id", "")
+                    print(f"Comparing with config model_id: {config_model_id}")  # Debug log
+                    if config_model_id.lower() == model_id_lower:
+                        # 检查环境变量是否已配置
+                        missing_keys = []
                         for env_var in model.get("env_vars", []):
                             key = env_var.get("key", "")
                             value = env_var.get("value", "")
-                            if key and value:
-                                os.environ[key] = value
-                                print(f"Set environment variable: {key}")
+                            if not key:
+                                continue
+                            if not value or not value.strip():
+                                missing_keys.append(key)
+                                continue
+                            os.environ[key] = value
+                            print(f"Set environment variable: {key}")
+                        
+                        if missing_keys:
+                            raise Exception("请先配置API密钥")
                         
                         self.current_model_id = model_id
+                        print(f"Successfully set model_id to: {model_id}")  # Debug log
                         return True
                         
+            print(f"No matching model found for model_id: {model_id}")  # Debug log
             return False
             
         except Exception as e:
             print(f"Error setting current model: {str(e)}")
-            return False
+            raise
             
     def get_downloads_dir(self):
         """Get user's downloads directory"""
@@ -230,6 +254,12 @@ class PDFConverterTool:
                     maintain_format=select_pages is None,  # 只在不选择页面时保持格式
                     select_pages=select_pages
                 )
+                print("\n=== Zerox Result ===")
+                print(f"Result type: {type(result)}")
+                print(f"Result content: {result}")
+                if hasattr(result, '__dict__'):
+                    print(f"Result attributes: {result.__dict__}")
+                print("===================\n")
             except Exception as e:
                 error_msg = str(e)
                 if "BadRequestError" in error_msg:
@@ -255,34 +285,4 @@ class PDFConverterTool:
             else:
                 return False, f"转换错误: {error_msg}"
             
-    async def batch_convert(self, input_folder, output_folder=None):
-        """
-        Batch convert PDF files
-        
-        Args:
-            input_folder: Input folder path
-            output_folder: Output folder path (optional, uses downloads directory by default)
-        """
-        # Check if model is selected
-        if not self.current_model_id:
-            return [{"error": "No model selected"}]
-            
-        # If no output folder specified, create one in downloads directory
-        if output_folder is None:
-            output_folder = os.path.join(self.get_downloads_dir(), "pdf_conversions")
-            
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-            
-        results = []
-        for filename in os.listdir(input_folder):
-            if filename.lower().endswith('.pdf'):
-                input_path = os.path.join(input_folder, filename)
-                success, message = await self.convert_file(input_path=input_path)
-                results.append({
-                    'filename': filename,
-                    'success': success,
-                    'message': message
-                })
-                
-        return results 
+    
