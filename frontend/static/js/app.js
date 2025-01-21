@@ -163,18 +163,37 @@ createApp({
         },
         async renderPage(pageNumber) {
             const page = await this.pdfDoc.getPage(pageNumber);
-            const container = document.getElementById('pdf-preview');
-            const viewport = page.getViewport({ scale: container.clientWidth / page.getViewport({ scale: 1 }).width });
             const canvas = document.getElementById('pdf-canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
+            const container = document.getElementById('pdf-preview');
+            
+            // 获取容器的可用宽度（减去内边距）
+            const containerWidth = container.clientWidth - 32; // 减去左右各16px的内边距
+            
+            // 获取PDF页面的原始尺寸
+            const originalViewport = page.getViewport({ scale: 1 });
+            
+            // 计算适合容器宽度的缩放比例
+            const scale = containerWidth / originalViewport.width;
+            
+            // 使用计算出的缩放比例创建新的viewport
+            const viewport = page.getViewport({ scale });
+            
+            // 设置canvas尺寸
             canvas.width = viewport.width;
-
+            canvas.height = viewport.height;
+            
+            // 渲染PDF页面
             const renderContext = {
-                canvasContext: context,
+                canvasContext: canvas.getContext('2d'),
                 viewport: viewport
             };
-            await page.render(renderContext).promise;
+            
+            try {
+                await page.render(renderContext).promise;
+            } catch (error) {
+                console.error('Error rendering PDF page:', error);
+                this.error = '无法渲染PDF页面';
+            }
         },
         nextPage() {
             if (this.currentPage < this.totalPages) {
@@ -408,11 +427,20 @@ createApp({
     },
     mounted() {
         this.loadModels()
+        window.addEventListener('resize', this.handleResize)
         // 点击 ESC 关闭导出菜单
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.showExportMenu) {
                 this.showExportMenu = false
             }
         })
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.handleResize)
+    },
+    handleResize() {
+        if (this.pdfDoc && this.currentPage) {
+            this.renderPage(this.currentPage)
+        }
     }
 }).mount('#app')
