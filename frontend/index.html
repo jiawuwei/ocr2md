@@ -163,13 +163,13 @@
                 </div>
                 
                 <!-- Control Panel -->
-                <div class="control-panel bg-gradient-to-r from-rose-900/60 to-rose-800/50 backdrop-blur-sm border border-white/30 shadow-lg">
+                <div class="control-panel bg-gradient-to-r from-purple-200/80 to-purple-100/70 backdrop-blur-sm border border-purple-200/30 shadow-lg">
                     <!-- File Upload -->
                     <div>
-                        <div class="border-2 border-dashed border-white/30 rounded-lg p-2 text-center h-[38px] bg-gradient-to-r from-rose-800/50 to-rose-700/40"
+                        <div class="border-2 border-dashed border-purple-200/40 rounded-lg p-2 text-center h-[38px] bg-gradient-to-r from-purple-100/70 to-purple-50/60"
                              @dragover.prevent
                              @drop.prevent="handleFileDrop"
-                             :class="{'border-white/50': isDragging, 'border-red-400': validationErrors.file}"
+                             :class="{'border-purple-300/50': isDragging, 'border-red-400': validationErrors.file}"
                              @dragenter="isDragging = true"
                              @dragleave="isDragging = false">
                             <input type="file"
@@ -178,20 +178,20 @@
                                    class="hidden"
                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.xls,.xlsx,.ppt,.pptx,.html,.xml,.rtf">
                             <div v-if="!selectedFile" class="flex items-center justify-center h-full">
-                                <i class="mdi mdi-upload text-white/90 mr-2"></i>
-                                <span class="text-sm text-white/90">拖放文件或</span>
+                                <i class="mdi mdi-upload text-purple-700/90 mr-2"></i>
+                                <span class="text-sm text-purple-700/90">拖放文件或</span>
                                 <button @click="$refs.fileInput.click()"
-                                        class="ml-1 px-2 py-0.5 bg-gradient-to-r from-rose-700/60 to-rose-600/50 text-white text-sm rounded hover:from-rose-600/70 hover:to-rose-500/60">
+                                        class="ml-1 px-2 py-0.5 bg-gradient-to-r from-purple-300/70 to-purple-200/60 text-purple-700 text-sm rounded hover:from-purple-400/70 hover:to-purple-300/60">
                                     选择文件
                                 </button>
                             </div>
                             <div v-else class="flex items-center justify-between h-full px-2">
                                 <div class="flex items-center">
-                                    <i class="mdi mdi-file text-white/90 mr-2"></i>
-                                    <span class="text-sm text-white truncate">{{ selectedFile.name }}</span>
+                                    <i class="mdi mdi-file text-purple-700/90 mr-2"></i>
+                                    <span class="text-sm text-purple-700 truncate">{{ selectedFile.name }}</span>
                                 </div>
                                 <button @click="selectedFile = null"
-                                        class="text-white/90 hover:text-white">
+                                        class="text-purple-700/90 hover:text-purple-800">
                                     <i class="mdi mdi-close"></i>
                                 </button>
                             </div>
@@ -202,11 +202,11 @@
                     <div>
                         <select v-model="selectedModel" 
                                 :class="{'border-red-400 ring-red-300': validationErrors.model}"
-                                class="w-full h-[38px] px-3 border border-white/30 rounded bg-gradient-to-r from-rose-800/50 to-rose-700/40 text-white placeholder-white/60 focus:border-white/40 focus:ring-1 focus:ring-white/40">
-                            <option value="" class="bg-rose-800">选择模型</option>
+                                class="w-full h-[38px] px-3 border border-purple-200/40 rounded bg-gradient-to-r from-purple-100/70 to-purple-50/60 text-purple-700 placeholder-purple-400 focus:border-purple-300/50 focus:ring-1 focus:ring-purple-300/50">
+                            <option value="" class="bg-purple-50">选择模型</option>
                             <template v-for="vendor in models">
-                                <optgroup :label="vendor.vendor_name" class="bg-rose-800">
-                                    <option v-for="model in vendor.models" :key="model.model_id" :value="model.model_id" class="bg-rose-800">
+                                <optgroup :label="vendor.vendor_name" class="bg-purple-50">
+                                    <option v-for="model in vendor.models" :key="model.model_id" :value="model.model_id" class="bg-purple-50">
                                         {{ model.model_name }}
                                     </option>
                                 </optgroup>
@@ -220,7 +220,7 @@
                                v-model="pages" 
                                placeholder="页面选择（可选，例如: 1,2,3 或 1-5）" 
                                :class="{'border-red-400 ring-red-300': validationErrors.pages}"
-                               class="w-full h-[38px] px-3 border border-white/30 rounded bg-gradient-to-r from-rose-800/50 to-rose-700/40 text-white placeholder-white/60 focus:border-white/40 focus:ring-1 focus:ring-white/40">
+                               class="w-full h-[38px] px-3 border border-purple-200/40 rounded bg-gradient-to-r from-purple-100/70 to-purple-50/60 text-purple-700 placeholder-purple-400 focus:border-purple-300/50 focus:ring-1 focus:ring-purple-300/50">
                     </div>
 
                     <!-- Convert Button -->
@@ -228,12 +228,12 @@
                         <button v-if="!isConverting" 
                                 @click="convertFile" 
                                 :disabled="!canConvert" 
-                                class="w-full h-[38px] bg-gradient-to-r from-rose-700/60 to-rose-600/50 text-white rounded hover:from-rose-600/70 hover:to-rose-500/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
+                                class="w-full h-[38px] bg-gradient-to-r from-purple-300/70 to-purple-200/60 text-purple-700 rounded hover:from-purple-400/70 hover:to-purple-300/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
                             <span>开始转换</span>
                         </button>
                         <button v-else 
                                 @click="stopConversion" 
-                                class="w-full h-[38px] bg-gradient-to-r from-red-500/80 to-red-500/70 text-white rounded hover:from-red-500/90 hover:to-red-500/80 flex items-center justify-center shadow-sm">
+                                class="w-full h-[38px] bg-gradient-to-r from-red-400/70 to-red-300/60 text-white rounded hover:from-red-500/70 hover:to-red-400/60 flex items-center justify-center shadow-sm">
                             <i class="mdi mdi-loading mdi-spin mr-2"></i>
                             <span>停止转换</span>
                         </button>
@@ -260,14 +260,14 @@
                         </div>
                         
                         <!-- Floating Navigation -->
-                        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-white/25 to-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-3 border border-white/30">
+                        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-200/80 to-purple-100/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-3 border border-purple-200/30">
                             <button @click="prevPage" :disabled="currentPage <= 1" 
-                                    class="p-1 rounded-full hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                    class="p-1 rounded-full hover:bg-purple-300/40 disabled:opacity-30 disabled:hover:bg-transparent text-purple-700 text-xs">
                                 <i class="mdi mdi-chevron-left text-base"></i>
                             </button>
-                            <span class="text-[10px] font-medium text-white">{{ currentPage }} / {{ totalPages }}</span>
+                            <span class="text-[10px] font-medium text-purple-700">{{ currentPage }} / {{ totalPages }}</span>
                             <button @click="nextPage" :disabled="currentPage >= totalPages" 
-                                    class="p-1 rounded-full hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent text-white text-xs">
+                                    class="p-1 rounded-full hover:bg-purple-300/40 disabled:opacity-30 disabled:hover:bg-transparent text-purple-700 text-xs">
                                 <i class="mdi mdi-chevron-right text-base"></i>
                             </button>
                         </div>
