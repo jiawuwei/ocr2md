@@ -22,7 +22,7 @@ createApp({
             isConverting: false,
             isDragging: false,
             convertSuccess: false,
-            maxFileSize: 50 * 1024 * 1024, // 50MB
+            maxFileSize: 100 * 1024 * 1024, // 100MB
             validationErrors: {
                 file: null,
                 model: null,
@@ -37,6 +37,15 @@ createApp({
     },
     computed: {
         canConvert() {
+            // 添加调试信息
+            console.log('Validation status:', {
+                hasFile: !!this.selectedFile,
+                hasModel: !!this.selectedModel,
+                notConverting: !this.isConverting,
+                fileSizeOk: this.selectedFile ? this.selectedFile.size <= this.maxFileSize : false,
+                noValidationErrors: !this.hasValidationErrors
+            });
+            
             return this.selectedFile && 
                    this.selectedModel && 
                    !this.isConverting && 
@@ -44,20 +53,22 @@ createApp({
                    !this.hasValidationErrors
         },
         hasValidationErrors() {
-            return Object.values(this.validationErrors).some(error => error !== null)
+            const errors = Object.values(this.validationErrors).some(error => error !== null);
+            console.log('Validation errors:', this.validationErrors);
+            return errors;
         },
         fileError() {
-            if (!this.showValidation) return null
-            if (!this.selectedFile) return 'Please select a file'
+            if (!this.showValidation) return null;
+            if (!this.selectedFile) return '请选择文件';
             if (this.selectedFile.size > this.maxFileSize) {
-                return 'File size exceeds 50MB limit'
+                return '文件大小超过100MB限制';
             }
-            return null
+            return null;
         },
         modelError() {
-            if (!this.showValidation) return null
-            if (!this.selectedModel) return 'Please select an AI model'
-            return null
+            if (!this.showValidation) return null;
+            if (!this.selectedModel) return '请选择AI模型';
+            return null;
         },
         pageError() {
             if (!this.showValidation) return null
@@ -133,27 +144,48 @@ createApp({
                 model: this.modelError,
                 pages: this.pageError
             }
+            console.log('Updated validation errors:', this.validationErrors);
             // 只显示第一个错误
             const firstError = Object.values(this.validationErrors).find(error => error !== null)
-            this.error = firstError || null
-        },
-        validateBeforeConvert() {
-            this.showValidation = true
-            this.updateValidationErrors()
-            if (this.hasValidationErrors) {
-                throw new Error(this.error)
+            if (firstError) {
+                console.log('Found validation error:', firstError);
+                this.error = firstError;
+            } else {
+                this.error = null;
             }
         },
+        validateBeforeConvert() {
+            console.log('Starting validation before convert');
+            this.showValidation = true;
+            this.updateValidationErrors();
+            if (this.hasValidationErrors) {
+                console.log('Validation failed:', this.error);
+                throw new Error(this.error || '验证失败');
+            }
+            console.log('Validation passed');
+        },
         async convertFile() {
-            this.validateBeforeConvert()
-            if (!this.canConvert) return
+            console.log('Convert button clicked');
+            console.log('Current state:', {
+                selectedFile: !!this.selectedFile,
+                selectedModel: this.selectedModel,
+                isConverting: this.isConverting,
+                hasValidationErrors: this.hasValidationErrors,
+                canConvert: this.canConvert
+            });
 
             try {
-                this.isConverting = true
-                this.error = null
-                this.convertSuccess = false
-                this.markdownContent = ''  // 清空之前的内容
-                this.abortController = new AbortController()
+                this.validateBeforeConvert();
+                if (!this.canConvert) {
+                    console.log('Cannot convert - validation failed');
+                    return;
+                }
+
+                this.isConverting = true;
+                this.error = null;
+                this.convertSuccess = false;
+                this.markdownContent = '';  // 清空之前的内容
+                this.abortController = new AbortController();
 
                 const formData = new FormData()
                 formData.append('file', this.selectedFile)

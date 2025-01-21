@@ -12,6 +12,7 @@ import uvicorn
 import logging
 from datetime import datetime
 import sys
+from typing import Optional
 
 # Configure logging
 log_dir = Path("logs")
@@ -43,8 +44,11 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
+
+# 设置文件上传大小限制
+app.router.route_class.max_request_size = 100 * 1024 * 1024  # 100MB
 
 # Create document converter instance
 pdf_converter = PDFConverterTool()
@@ -65,7 +69,7 @@ async def read_root():
 
 @app.post("/api/convert")
 async def convert_file(
-    file: UploadFile = File(...),
+    file: UploadFile = File(..., description="File to convert"),
     model_id: str = Form(...),
     pages: str = Form(None),
     request: Request = None
@@ -109,25 +113,25 @@ async def convert_file(
             logger.warning("Client disconnected")
             raise HTTPException(status_code=499, detail="Client disconnected")
 
-        # Check file size (optional, adjust limit as needed)
-        file_size = 0
-        while chunk := await file.read(8192):
-            file_size += len(chunk)
-            if file_size > 50 * 1024 * 1024:  # 50MB limit
-                logger.warning(f"File too large: {file_size / (1024*1024):.2f}MB")
-                raise HTTPException(status_code=400, detail="File too large (max 50MB)")
-            # Check connection status periodically
-            if await request.is_disconnected():
-                logger.warning("Client disconnected during file upload")
-                raise HTTPException(status_code=499, detail="Client disconnected")
-        await file.seek(0)
-        logger.info(f"File size: {file_size / (1024*1024):.2f}MB")
-
         # Save uploaded file
         temp_input = UPLOAD_DIR / file.filename
         logger.info(f"Saving uploaded file to: {temp_input}")
+        
+        # Read and check file size
+        file_size = 0
         with temp_input.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            while chunk := await file.read(8192):
+                file_size += len(chunk)
+                if file_size > 100 * 1024 * 1024:  # 100MB limit
+                    logger.warning(f"File too large: {file_size / (1024*1024):.2f}MB")
+                    raise HTTPException(status_code=400, detail="File too large (max 100MB)")
+                buffer.write(chunk)
+                # Check connection status periodically
+                if await request.is_disconnected():
+                    logger.warning("Client disconnected during file upload")
+                    raise HTTPException(status_code=499, detail="Client disconnected")
+        
+        logger.info(f"File size: {file_size / (1024*1024):.2f}MB")
 
         # Process page parameters
         page_list = None

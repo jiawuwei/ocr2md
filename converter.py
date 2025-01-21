@@ -80,19 +80,51 @@ class PDFConverterTool:
                     if config_model_id.lower() == model_id_lower:
                         # 检查环境变量是否已配置
                         missing_keys = []
-                        for env_var in model.get("env_vars", []):
+                        env_vars = model.get("env_vars", [])
+                        print(f"Checking environment variables: {[ev.get('key') for ev in env_vars]}")  # Debug log
+                        
+                        for env_var in env_vars:
                             key = env_var.get("key", "")
-                            value = env_var.get("value", "")
-                            if not key:
+                            if not key or key == "OPENAI_API_BASE":  # 忽略 OPENAI_API_BASE
                                 continue
-                            if not value or not value.strip():
+                                
+                            # 获取环境变量的值，确保处理 None 的情况
+                            env_value = os.environ.get(key)
+                            env_value = env_value.strip() if env_value else ""
+                            
+                            config_value = env_var.get("value")
+                            config_value = config_value.strip() if config_value else ""
+                            
+                            print(f"Checking {key}:")  # Debug log
+                            print(f"  - Environment value exists: {bool(env_value)}")
+                            print(f"  - Config value exists: {bool(config_value)}")
+                            
+                            # 如果环境变量和配置文件都没有值，则添加到缺失列表
+                            if not env_value and not config_value:
                                 missing_keys.append(key)
                                 continue
-                            os.environ[key] = value
-                            print(f"Set environment variable: {key}")
+                            
+                            # 如果配置文件中有值，使用配置文件的值
+                            if config_value:
+                                os.environ[key] = config_value
+                                print(f"Set environment variable from config: {key}")
+                            elif env_value:
+                                print(f"Using existing environment variable: {key}")
                         
                         if missing_keys:
-                            raise Exception("请先配置API密钥")
+                            print(f"Missing API keys: {missing_keys}")  # Debug log
+                            raise Exception(f"缺少API密钥: {', '.join(missing_keys)}")
+                        
+                        # 如果有 OPENAI_API_BASE 的配置，设置它，但不强制要求
+                        for env_var in env_vars:
+                            if env_var.get("key") == "OPENAI_API_BASE":
+                                value = env_var.get("value")
+                                if value and isinstance(value, str):
+                                    config_value = value.strip()
+                                    if config_value:
+                                        os.environ["OPENAI_API_BASE"] = config_value
+                                        print("Set OPENAI_API_BASE from config")
+                                break
                         
                         self.current_model_id = model_id
                         print(f"Successfully set model_id to: {model_id}")  # Debug log
