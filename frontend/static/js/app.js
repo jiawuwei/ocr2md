@@ -32,7 +32,10 @@ createApp({
             abortController: null,
             markdownContent: '',  // 添加 markdown 内容
             showExportMenu: false,
-            copySuccess: false
+            copySuccess: false,
+            pdfDoc: null,
+            currentPage: 1,
+            totalPages: 0
         }
     },
     computed: {
@@ -125,6 +128,9 @@ createApp({
                 if (this.showValidation) {
                     this.updateValidationErrors()
                 }
+                if (file.type === 'application/pdf') {
+                    this.loadPdf(file)
+                }
             }
         },
         handleFileDrop(event) {
@@ -136,6 +142,50 @@ createApp({
                 if (this.showValidation) {
                     this.updateValidationErrors()
                 }
+                if (file.type === 'application/pdf') {
+                    this.loadPdf(file)
+                }
+            }
+        },
+        async loadPdf(file) {
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+            const fileReader = new FileReader();
+            fileReader.onload = async (e) => {
+                const typedarray = new Uint8Array(e.target.result);
+                this.pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+                this.totalPages = this.pdfDoc.numPages;
+                this.currentPage = 1;
+                this.renderPage(this.currentPage);
+            };
+            fileReader.readAsArrayBuffer(file);
+        },
+        async renderPage(pageNumber) {
+            const page = await this.pdfDoc.getPage(pageNumber);
+            const container = document.getElementById('pdf-preview');
+            const viewport = page.getViewport({ scale: container.clientWidth / page.getViewport({ scale: 1 }).width });
+            const canvas = document.getElementById('pdf-canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            await page.render(renderContext).promise;
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.renderPage(this.currentPage);
+            }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.renderPage(this.currentPage);
             }
         },
         updateValidationErrors() {
@@ -365,4 +415,4 @@ createApp({
             }
         })
     }
-}).mount('#app') 
+}).mount('#app')
