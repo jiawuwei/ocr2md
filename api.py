@@ -47,7 +47,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# 设置文件上传大小限制
+# Set file upload size limit
 app.router.route_class.max_request_size = 100 * 1024 * 1024  # 100MB
 
 # Create document converter instance
@@ -92,7 +92,7 @@ async def convert_file(
         # Validate model selection
         if not model_id:
             logger.warning("No model selected")
-            raise HTTPException(status_code=400, detail="Please select an AI model")
+            raise HTTPException(status_code=400, detail="Please select a model")
 
         # Set model
         try:
@@ -199,7 +199,7 @@ async def convert_file(
 
 @app.get("/api/models")
 async def get_models():
-    """Get list of available AI models"""
+    """Get list of available AI models."""
     logger.info("Getting available models")
     try:
         vendors = pdf_converter.get_model_list()

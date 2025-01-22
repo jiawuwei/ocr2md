@@ -1,9 +1,9 @@
 const { createApp } = Vue
 
-// 配置 marked
+// Configure marked
 marked.setOptions({
-    gfm: true, // GitHub 风格的 Markdown
-    breaks: true, // 允许回车换行
+    gfm: true, // GitHub Flavored Markdown
+    breaks: true, // Allow line breaks
     highlight: function(code, lang) {
         const language = hljs.getLanguage(lang) ? lang : 'plaintext';
         return hljs.highlight(code, { language }).value;
@@ -30,7 +30,7 @@ createApp({
             },
             showValidation: false,
             abortController: null,
-            markdownContent: '',  // 添加 markdown 内容
+            markdownContent: '',  // Add markdown content
             showExportMenu: false,
             copySuccess: false,
             pdfDoc: null,
@@ -40,7 +40,7 @@ createApp({
     },
     computed: {
         canConvert() {
-            // 添加调试信息
+            // Add debugging information
             console.log('Validation status:', {
                 hasFile: !!this.selectedFile,
                 hasModel: !!this.selectedModel,
@@ -62,15 +62,15 @@ createApp({
         },
         fileError() {
             if (!this.showValidation) return null;
-            if (!this.selectedFile) return '请选择文件';
+            if (!this.selectedFile) return 'Please select a file';
             if (this.selectedFile.size > this.maxFileSize) {
-                return '文件大小超过100MB限制';
+                return 'File size exceeds 100MB limit';
             }
             return null;
         },
         modelError() {
             if (!this.showValidation) return null;
-            if (!this.selectedModel) return '请选择AI模型';
+            if (!this.selectedModel) return 'Please select a model';
             return null;
         },
         pageError() {
@@ -166,23 +166,23 @@ createApp({
             const canvas = document.getElementById('pdf-canvas');
             const container = document.getElementById('pdf-preview');
             
-            // 获取容器的可用宽度（减去内边距）
-            const containerWidth = container.clientWidth - 32; // 减去左右各16px的内边距
+            // Get container's available width (minus padding)
+            const containerWidth = container.clientWidth - 32; // Subtract 16px padding on each side
             
-            // 获取PDF页面的原始尺寸
+            // Get original dimensions of the PDF page
             const originalViewport = page.getViewport({ scale: 1 });
             
-            // 计算适合容器宽度的缩放比例
+            // Calculate scaling ratio to fit container width
             const scale = containerWidth / originalViewport.width;
             
-            // 使用计算出的缩放比例创建新的viewport
+            // Use calculated scaling ratio to create new viewport
             const viewport = page.getViewport({ scale });
             
-            // 设置canvas尺寸
+            // Set canvas dimensions
             canvas.width = viewport.width;
             canvas.height = viewport.height;
             
-            // 渲染PDF页面
+            // Render PDF page
             const renderContext = {
                 canvasContext: canvas.getContext('2d'),
                 viewport: viewport
@@ -192,7 +192,7 @@ createApp({
                 await page.render(renderContext).promise;
             } catch (error) {
                 console.error('Error rendering PDF page:', error);
-                this.error = '无法渲染PDF页面';
+                this.error = 'Cannot render PDF page';
             }
         },
         nextPage() {
@@ -214,7 +214,7 @@ createApp({
                 pages: this.pageError
             }
             console.log('Updated validation errors:', this.validationErrors);
-            // 只显示第一个错误
+            // Show only the first error
             const firstError = Object.values(this.validationErrors).find(error => error !== null)
             if (firstError) {
                 console.log('Found validation error:', firstError);
@@ -229,7 +229,7 @@ createApp({
             this.updateValidationErrors();
             if (this.hasValidationErrors) {
                 console.log('Validation failed:', this.error);
-                throw new Error(this.error || '验证失败');
+                throw new Error(this.error || 'Validation failed');
             }
             console.log('Validation passed');
         },
@@ -253,7 +253,7 @@ createApp({
                 this.isConverting = true;
                 this.error = null;
                 this.convertSuccess = false;
-                this.markdownContent = '';  // 清空之前的内容
+                this.markdownContent = '';  // Clear previous content
                 this.abortController = new AbortController();
 
                 const formData = new FormData()
@@ -279,7 +279,7 @@ createApp({
                     throw new Error('Conversion failed: empty result')
                 }
 
-                // 保存文件
+                // Save file
                 const url = window.URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
@@ -289,7 +289,7 @@ createApp({
                 window.URL.revokeObjectURL(url)
                 document.body.removeChild(a)
 
-                // 显示预览
+                // Show preview
                 this.markdownContent = await blob.text()
                 
                 this.convertSuccess = true
@@ -299,7 +299,7 @@ createApp({
                 }, 5000)
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    this.error = '转换已停止'
+                    this.error = 'Conversion stopped'
                 } else {
                     this.error = error.message
                 }
@@ -321,7 +321,7 @@ createApp({
         },
         toggleExportMenu() {
             this.showExportMenu = !this.showExportMenu
-            // 点击外部关闭菜单
+            // Click outside to close menu
             if (this.showExportMenu) {
                 setTimeout(() => {
                     const closeMenu = (e) => {
@@ -340,13 +340,13 @@ createApp({
                 this.showExportMenu = false
                 this.copySuccess = true
                 this.error = null
-                // 显示临时成功消息
+                // Show temporary success message
                 this.convertSuccess = true
                 setTimeout(() => {
                     this.convertSuccess = false
                 }, 2000)
             } catch (err) {
-                this.error = '复制失败，请重试'
+                this.error = 'Copy failed, please try again'
             }
         },
         downloadMarkdown() {
@@ -363,10 +363,10 @@ createApp({
         },
         async downloadWord() {
             try {
-                // 将 Markdown 转换为 HTML
+                // Convert Markdown to HTML
                 const htmlContent = marked.parse(this.markdownContent);
                 
-                // 创建完整的 HTML 文档
+                // Create full HTML document
                 const fullHtml = `
                     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                     <head>
@@ -388,12 +388,12 @@ createApp({
                     </html>
                 `;
 
-                // 创建 Blob
+                // Create Blob
                 const blob = new Blob([fullHtml], {
                     type: 'application/msword;charset=utf-8'
                 });
 
-                // 下载文件
+                // Download file
                 const fileName = `${this.selectedFile.name.split('.')[0]}_converted.doc`;
                 saveAs(blob, fileName);
                 
@@ -404,7 +404,7 @@ createApp({
                 }, 2000);
             } catch (err) {
                 console.error('Word export error:', err);
-                this.error = '导出Word失败：' + err.message;
+                this.error = 'Word export failed: ' + err.message;
             }
         }
     },
@@ -428,7 +428,7 @@ createApp({
     mounted() {
         this.loadModels()
         window.addEventListener('resize', this.handleResize)
-        // 点击 ESC 关闭导出菜单
+        // Click ESC to close export menu
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.showExportMenu) {
                 this.showExportMenu = false

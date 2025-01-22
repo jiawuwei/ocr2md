@@ -113,9 +113,9 @@ class PDFConverterTool:
                         
                         if missing_keys:
                             print(f"Missing API keys: {missing_keys}")  # Debug log
-                            raise Exception(f"缺少API密钥: {', '.join(missing_keys)}")
+                            raise Exception(f"Missing API keys: {', '.join(missing_keys)}")
                         
-                        # 如果有 OPENAI_API_BASE 的配置，设置它，但不强制要求
+                        # Set OPENAI_API_BASE if configured, but not required
                         for env_var in env_vars:
                             if env_var.get("key") == "OPENAI_API_BASE":
                                 value = env_var.get("value")
@@ -308,9 +308,9 @@ class PDFConverterTool:
             except Exception as e:
                 error_msg = str(e)
                 if "BadRequestError" in error_msg:
-                    return False, "API请求错误，请检查API密钥是否正确设置"
+                    return False, "API request error, please check if the API key is set correctly"
                 else:
-                    raise  # 重新抛出其他类型的异常
+                    raise  # Re-raise other types of exceptions
             
             if result and result.file_name:
                 output_file = os.path.join(output_dir, result.file_name)+".md"
@@ -324,11 +324,11 @@ class PDFConverterTool:
         except Exception as e:
             error_msg = str(e)
             if "rate limit" in error_msg.lower():
-                return False, "API调用频率超限，请稍后重试"
+                return False, "API call frequency exceeded, please try again later"
             elif "api key" in error_msg.lower():
-                return False, "API密钥无效或未设置"
+                return False, "Invalid API key or not set"
             else:
-                return False, f"转换错误: {error_msg}"
+                return False, f"Conversion error: {error_msg}"
         finally:
             # 清理临时生成的PDF文件
             if 'pdf_path' in locals() and pdf_path != input_path:
