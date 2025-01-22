@@ -143,20 +143,20 @@
                         <button @click="toggleExportMenu" 
                                 class="px-4 py-2 bg-gradient-to-r from-white/25 to-white/20 text-white rounded-lg hover:from-white/30 hover:to-white/25 flex items-center shadow-sm">
                             <i class="mdi mdi-export mr-2"></i>
-                            导出
+                            Export
                         </button>
                         <div class="dropdown-content bg-white border border-gray-200" :class="{ 'show': showExportMenu }">
                             <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="copyMarkdown">
                                 <i class="mdi mdi-content-copy"></i>
-                                复制 Markdown
+                                Copy Markdown
                             </div>
                             <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="downloadMarkdown">
                                 <i class="mdi mdi-download"></i>
-                                下载 Markdown
+                                Download Markdown
                             </div>
                             <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="downloadWord">
                                 <i class="mdi mdi-microsoft-word"></i>
-                                导出为 Word
+                                Export to Word
                             </div>
                         </div>
                     </div>
@@ -179,10 +179,10 @@
                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.xls,.xlsx,.ppt,.pptx,.html,.xml,.rtf">
                             <div v-if="!selectedFile" class="flex items-center justify-center h-full">
                                 <i class="mdi mdi-upload text-purple-700/90 mr-2"></i>
-                                <span class="text-sm text-purple-700/90">拖放文件或</span>
+                                <span class="text-sm text-purple-700/90">Drop files here or</span>
                                 <button @click="$refs.fileInput.click()"
                                         class="ml-1 px-2 py-0.5 bg-gradient-to-r from-purple-300/70 to-purple-200/60 text-purple-700 text-sm rounded hover:from-purple-400/70 hover:to-purple-300/60">
-                                    选择文件
+                                    Choose File
                                 </button>
                             </div>
                             <div v-else class="flex items-center justify-between h-full px-2">
@@ -203,7 +203,7 @@
                         <select v-model="selectedModel" 
                                 :class="{'border-red-400 ring-red-300': validationErrors.model}"
                                 class="w-full h-[38px] px-3 border border-purple-200/40 rounded bg-gradient-to-r from-purple-100/70 to-purple-50/60 text-purple-700 placeholder-purple-400 focus:border-purple-300/50 focus:ring-1 focus:ring-purple-300/50">
-                            <option value="" class="bg-purple-50">选择模型</option>
+                            <option value="" class="bg-purple-50">Select Model</option>
                             <template v-for="vendor in models">
                                 <optgroup :label="vendor.vendor_name" class="bg-purple-50">
                                     <option v-for="model in vendor.models" :key="model.model_id" :value="model.model_id" class="bg-purple-50">
@@ -229,13 +229,13 @@
                                 @click="convertFile" 
                                 :disabled="!canConvert" 
                                 class="w-full h-[38px] bg-gradient-to-r from-rose-400 to-rose-300 text-white rounded hover:from-rose-500 hover:to-rose-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
-                            <span>开始转换</span>
+                            <span>Start Conversion</span>
                         </button>
                         <button v-else 
                                 @click="stopConversion" 
                                 class="w-full h-[38px] bg-gradient-to-r from-red-400/70 to-red-300/60 text-white rounded hover:from-red-500/70 hover:to-red-400/60 flex items-center justify-center shadow-sm">
                             <i class="mdi mdi-loading mdi-spin mr-2"></i>
-                            <span>停止转换</span>
+                            <span>Stop Conversion</span>
                         </button>
                     </div>
                 </div>
@@ -247,7 +247,7 @@
                 </div>
                 <div v-if="convertSuccess" class="mb-4 p-3 bg-gradient-to-r from-emerald-500/30 to-emerald-500/20 text-emerald-200 rounded flex items-center text-sm border border-emerald-500/30">
                     <i class="mdi mdi-check-circle mr-2"></i>
-                    转换成功！文件已下载。
+                    Conversion successful! File has been downloaded.
                 </div>
 
                 <!-- Preview Area -->
@@ -281,7 +281,7 @@
                                  v-html="markdownHtml">
                             </div>
                             <div v-else class="flex items-center justify-center h-full text-gray-300">
-                                <p>转换完成后在这里预览 Markdown 内容</p>
+                                <p>Markdown preview will appear here after conversion</p>
                             </div>
                         </div>
                     </div>
