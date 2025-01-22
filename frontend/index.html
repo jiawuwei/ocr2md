@@ -145,16 +145,16 @@
                             <i class="mdi mdi-export mr-2"></i>
                             导出
                         </button>
-                        <div class="dropdown-content bg-gradient-to-br from-white/20 to-white/15 backdrop-blur-sm border border-white/30" :class="{ 'show': showExportMenu }">
-                            <div class="dropdown-item text-white hover:bg-white/15" @click="copyMarkdown">
+                        <div class="dropdown-content bg-white border border-gray-200" :class="{ 'show': showExportMenu }">
+                            <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="copyMarkdown">
                                 <i class="mdi mdi-content-copy"></i>
                                 复制 Markdown
                             </div>
-                            <div class="dropdown-item text-white hover:bg-white/15" @click="downloadMarkdown">
+                            <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="downloadMarkdown">
                                 <i class="mdi mdi-download"></i>
                                 下载 Markdown
                             </div>
-                            <div class="dropdown-item text-white hover:bg-white/15" @click="downloadWord">
+                            <div class="dropdown-item text-gray-700 hover:bg-gray-100" @click="downloadWord">
                                 <i class="mdi mdi-microsoft-word"></i>
                                 导出为 Word
                             </div>
@@ -228,7 +228,7 @@
                         <button v-if="!isConverting" 
                                 @click="convertFile" 
                                 :disabled="!canConvert" 
-                                class="w-full h-[38px] bg-gradient-to-r from-purple-300/70 to-purple-200/60 text-purple-700 rounded hover:from-purple-400/70 hover:to-purple-300/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
+                                class="w-full h-[38px] bg-gradient-to-r from-rose-400 to-rose-300 text-white rounded hover:from-rose-500 hover:to-rose-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center shadow-sm">
                             <span>开始转换</span>
                         </button>
                         <button v-else 
@@ -277,7 +277,7 @@
                     <div class="preview-column bg-gradient-to-br from-white/15 to-white/10 backdrop-blur-sm rounded-lg shadow-lg p-4 border border-white/20">
                         <div class="h-full overflow-auto">
                             <div v-if="markdownContent" 
-                                 class="markdown-body bg-gradient-to-b from-black/5 to-transparent text-gray-100"
+                                 class="markdown-body bg-white text-gray-900 rounded-lg"
                                  v-html="markdownHtml">
                             </div>
                             <div v-else class="flex items-center justify-center h-full text-gray-300">
