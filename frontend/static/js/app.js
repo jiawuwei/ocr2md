@@ -4,7 +4,7 @@ const { createApp } = Vue
 marked.setOptions({
     gfm: true, // GitHub Flavored Markdown
     breaks: true, // Allow line breaks
-    highlight: function(code, lang) {
+    highlight: function (code, lang) {
         const language = hljs.getLanguage(lang) ? lang : 'plaintext';
         return hljs.highlight(code, { language }).value;
     },
@@ -48,12 +48,12 @@ createApp({
                 fileSizeOk: this.selectedFile ? this.selectedFile.size <= this.maxFileSize : false,
                 noValidationErrors: !this.hasValidationErrors
             });
-            
-            return this.selectedFile && 
-                   this.selectedModel && 
-                   !this.isConverting && 
-                   this.selectedFile.size <= this.maxFileSize &&
-                   !this.hasValidationErrors
+
+            return this.selectedFile &&
+                this.selectedModel &&
+                !this.isConverting &&
+                this.selectedFile.size <= this.maxFileSize &&
+                !this.hasValidationErrors
         },
         hasValidationErrors() {
             const errors = Object.values(this.validationErrors).some(error => error !== null);
@@ -101,20 +101,6 @@ createApp({
         }
     },
     methods: {
-            // 预览
-    goPreview() {
-
-        axios({
-          method: 'get',
-          responseType: 'blob', // 因为是流文件，所以要指定blob类型
-          url: 'http://ashuai.work:10000/getDoc' // 一个word下载文件的接口
-        }).then(({ data }) => {
-          console.log("xxxxxxxxxx") // 后端返回的是流文件
-        
-        docx.renderAsync(data, document.getElementById("preview-doc"))
-        .then(x => console.log("docx: finished"));
-        })
-      },
         async loadModels() {
             try {
                 const response = await fetch('/api/models')
@@ -144,6 +130,8 @@ createApp({
                 }
                 if (file.type === 'application/pdf') {
                     this.loadPdf(file)
+                } else {
+                    this.loadDoc(file)
                 }
             }
         },
@@ -175,33 +163,51 @@ createApp({
             };
             fileReader.readAsArrayBuffer(file);
         },
+        async loadPdf(file) {
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+            const fileReader = new FileReader();
+            fileReader.onload = async (e) => {
+                const typedarray = new Uint8Array(e.target.result);
+                this.pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+                this.totalPages = this.pdfDoc.numPages;
+                this.currentPage = 1;
+                this.renderPage(this.currentPage);
+            };
+            fileReader.readAsArrayBuffer(file);
+        },
+        async loadDoc(file) {
+            docx.renderAsync(file, document.getElementById("pdf-preview"))
+            .then(x => console.log("docx: finished"));
+        },
         async renderPage(pageNumber) {
             const page = await this.pdfDoc.getPage(pageNumber);
             const canvas = document.getElementById('pdf-canvas');
             const container = document.getElementById('pdf-preview');
-            
+
             // Get container's available width (minus padding)
             const containerWidth = container.clientWidth - 32; // Subtract 16px padding on each side
-            
+
             // Get original dimensions of the PDF page
             const originalViewport = page.getViewport({ scale: 1 });
-            
+
             // Calculate scaling ratio to fit container width
             const scale = containerWidth / originalViewport.width;
-            
+
             // Use calculated scaling ratio to create new viewport
             const viewport = page.getViewport({ scale });
-            
+
             // Set canvas dimensions
             canvas.width = viewport.width;
             canvas.height = viewport.height;
-            
+
             // Render PDF page
             const renderContext = {
                 canvasContext: canvas.getContext('2d'),
                 viewport: viewport
             };
-            
+
             try {
                 await page.render(renderContext).promise;
             } catch (error) {
@@ -305,7 +311,7 @@ createApp({
 
                 // Show preview
                 this.markdownContent = await blob.text()
-                
+
                 this.convertSuccess = true
                 this.showValidation = false
                 setTimeout(() => {
@@ -379,7 +385,7 @@ createApp({
             try {
                 // Convert Markdown to HTML
                 const htmlContent = marked.parse(this.markdownContent);
-                
+
                 // Create full HTML document
                 const fullHtml = `
                     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -410,7 +416,7 @@ createApp({
                 // Download file
                 const fileName = `${this.selectedFile.name.split('.')[0]}_converted.doc`;
                 saveAs(blob, fileName);
-                
+
                 this.showExportMenu = false;
                 this.convertSuccess = true;
                 setTimeout(() => {
@@ -421,7 +427,7 @@ createApp({
                 this.error = 'Word export failed: ' + err.message;
             }
         },
-  
+
     },
     watch: {
         selectedModel() {

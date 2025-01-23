@@ -138,13 +138,6 @@
 </head>
 <body class="bg-gradient-to-br from-rose-800/60 via-purple-800/50 to-indigo-900/70 min-h-screen text-gray-100">
     <div id="app" class="min-h-screen">
-        <div class="home">
-            <button @click="goPreview">点击预览word文件</button>
-            <div class="docWrap">
-              <!-- 预览文件的地方（用于渲染） -->
-              <div id="preview-doc"></div>
-            </div>
-          </div>
         <div class="container mx-auto px-2 py-4">
             <div class="max-w-[98%] mx-auto">
                 <div class="flex justify-between items-center mb-4">
@@ -300,22 +293,6 @@
             </div>
         </div>
     </div>
-
-      <style lang="less" scoped>
-        .home {
-          height: 100%;
-          overflow: auto;
-        }
-        .docWrap {
-          width: 900px;
-          overflow: auto;
-        }
-        </style>
-        <style>
-        .text-docx-wrapper {
-          background: #fff !important;
-        }
-        </style>
       
     <script src="/static/js/app.js"></script>
 </body>
