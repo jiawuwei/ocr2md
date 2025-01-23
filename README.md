@@ -41,24 +41,45 @@ FileMind AI is an advanced document conversion tool that leverages AI technology
 
 ### Installation
 
-1. Clone the repository:
+1. Install Python (3.8 or higher)
    ```bash
-   git clone https://github.com/yourusername/FileMind-AI.git
-   cd FileMind-AI
+   # Download from https://www.python.org/downloads/
+   # Make sure to check "Add Python to PATH" during installation
    ```
 
-2. Create and activate a virtual environment:
+2. Install system dependencies
    ```bash
-   # On macOS/Linux
-   python3 -m venv venv
-   source ./venv/bin/activate
+   # macOS (using Homebrew)
+   brew install libreoffice
+   brew install graphicsmagick
+   brew install poppler
+   
+   # Linux (Ubuntu/Debian)
+   sudo apt-get install libreoffice
+   sudo apt-get install graphicsmagick
+   sudo apt-get install poppler-utils
+   
+   # Windows
+   # Download and install:
+   # - LibreOffice: https://www.libreoffice.org/download/
+   # - GraphicsMagick: http://www.graphicsmagick.org/download.html
+   # - Poppler: https://github.com/oschwartz10612/poppler-windows/releases/
+   #   After downloading Poppler, add its 'bin' directory to your system PATH
+   ```
 
-   # On Windows
+3. Create virtual environment
+   ```bash
+   # Create venv
    python -m venv venv
-   .\venv\Scripts\activate
+   
+   # Activate venv
+   # Windows
+   venv\Scripts\activate
+   # macOS/Linux
+   source venv/bin/activate
    ```
 
-3. Install dependencies:
+4. Install Python dependencies
    ```bash
    pip install -r requirements.txt
    ```
