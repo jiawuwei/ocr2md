@@ -164,13 +164,13 @@ createApp({
             fileReader.readAsArrayBuffer(file);
         },
         async loadDoc(file) {
-            docx.renderAsync(file, document.getElementById("pdf-preview"))
+            docx.renderAsync(file, document.getElementById("file-preview"))
             .then(x => console.log("docx: finished"));
         },
         async renderPage(pageNumber) {
             const page = await this.pdfDoc.getPage(pageNumber);
             const canvas = document.getElementById('pdf-canvas');
-            const container = document.getElementById('pdf-preview');
+            const container = document.getElementById('file-preview');
 
             // Get container's available width (minus padding)
             const containerWidth = container.clientWidth - 32; // Subtract 16px padding on each side
