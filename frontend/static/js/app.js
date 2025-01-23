@@ -125,6 +125,7 @@ createApp({
             if (file) {
                 this.selectedFile = file
                 this.convertSuccess = false
+                const fileName = this.selectedFile.name.toLowerCase();
                 if (this.showValidation) {
                     this.updateValidationErrors()
                 }
@@ -132,7 +133,10 @@ createApp({
                     this.loadPdf(file)
                 } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                     this.loadDoc(file)
-                } else if (file.type.startsWith('image/')) {
+                } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                    this.previewExcel();
+                }
+                else if (file.type.startsWith('image/')) {
                     this.loadImage(file)
                 } else {
                     console.warn('Unsupported file type:', file.type)
@@ -170,26 +174,78 @@ createApp({
         },
         async loadDoc(file) {
             docx.renderAsync(file, document.getElementById("file-preview"))
-            .then(x => console.log("docx: finished"));
+                .then(x => console.log("docx: finished"));
         },
         async loadImage(file) {
             const container = document.getElementById('file-preview');
             // Clear existing content
             container.innerHTML = '';
-            
+
             const img = document.createElement('img');
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
             img.style.display = 'block';
             img.style.margin = '0 auto';
-            
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            
+
             container.appendChild(img);
+        },
+
+        async previewExcel() {
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Convert Excel data to LuckySheet format
+                    const luckySheetData = [];
+
+                    workbook.SheetNames.forEach((sheetName) => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                        luckySheetData.push({
+                            name: sheetName,
+                            data: jsonData.map(row =>
+                                row.map(cell => ({ v: cell }))
+                            ),
+                            status: 1
+                        });
+                    });
+
+                    // Initialize LuckySheet
+                    const container = document.getElementById('file-preview');
+                    container.style.height = '100%';
+
+                    luckysheet.create({
+                        container: 'file-preview',
+                        data: luckySheetData,
+                        showinfobar: false,
+                        showsheetbar: true,
+                        showstatisticBar: false,
+                        allowCopy: true,
+                        showtoolbar: false,
+                        enableAddRow: false,
+                        enableAddCol: false
+                    });
+                } catch (error) {
+                    console.error('Excel preview error:', error);
+                    this.error = 'Failed to preview Excel file: ' + error.message;
+                }
+            };
+
+            reader.onerror = () => {
+                this.error = 'Failed to read Excel file';
+            };
+
+            reader.readAsArrayBuffer(this.selectedFile);
         },
         async renderPage(pageNumber) {
             const page = await this.pdfDoc.getPage(pageNumber);
