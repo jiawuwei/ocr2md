@@ -163,20 +163,6 @@ createApp({
             };
             fileReader.readAsArrayBuffer(file);
         },
-        async loadPdf(file) {
-            const pdfjsLib = window['pdfjs-dist/build/pdf'];
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
-
-            const fileReader = new FileReader();
-            fileReader.onload = async (e) => {
-                const typedarray = new Uint8Array(e.target.result);
-                this.pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
-                this.totalPages = this.pdfDoc.numPages;
-                this.currentPage = 1;
-                this.renderPage(this.currentPage);
-            };
-            fileReader.readAsArrayBuffer(file);
-        },
         async loadDoc(file) {
             docx.renderAsync(file, document.getElementById("pdf-preview"))
             .then(x => console.log("docx: finished"));
