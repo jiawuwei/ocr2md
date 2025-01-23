@@ -129,6 +129,9 @@ createApp({
                 if (this.showValidation) {
                     this.updateValidationErrors()
                 }
+                // Clear existing preview
+                this.clearPreview()
+                
                 if (file.type === 'application/pdf') {
                     this.loadPdf(file)
                 } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
@@ -153,6 +156,9 @@ createApp({
                 if (this.showValidation) {
                     this.updateValidationErrors()
                 }
+                // Clear existing preview
+                this.clearPreview()
+                
                 if (file.type === 'application/pdf') {
                     this.loadPdf(file)
                 }
@@ -196,6 +202,36 @@ createApp({
             container.appendChild(img);
         },
 
+        clearPreview() {
+            const container = document.getElementById('file-preview');
+            
+            // Clear PDF viewer
+            if (this.pdfDoc) {
+                this.pdfDoc = null;
+                this.currentPage = 1;
+                this.totalPages = 0;
+            }
+            
+            // Clear Excel preview
+            if (this.luckysheetInstance) {
+                luckysheet.destroy();
+                this.luckysheetInstance = null;
+            }
+            
+            // Clear container content
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+            
+            // Reset container style
+            container.style.height = '';
+            
+            // Add canvas back for PDF preview
+            const canvas = document.createElement('canvas');
+            canvas.id = 'pdf-canvas';
+            container.appendChild(canvas);
+        },
+
         async previewExcel() {
             const reader = new FileReader();
 
@@ -224,7 +260,7 @@ createApp({
                     const container = document.getElementById('file-preview');
                     container.style.height = '100%';
 
-                    luckysheet.create({
+                    this.luckysheetInstance = luckysheet.create({
                         container: 'file-preview',
                         data: luckySheetData,
                         showinfobar: false,
