@@ -101,6 +101,20 @@ createApp({
         }
     },
     methods: {
+            // 预览
+    goPreview() {
+
+        axios({
+          method: 'get',
+          responseType: 'blob', // 因为是流文件，所以要指定blob类型
+          url: 'http://ashuai.work:10000/getDoc' // 一个word下载文件的接口
+        }).then(({ data }) => {
+          console.log("xxxxxxxxxx") // 后端返回的是流文件
+        
+        docx.renderAsync(data, document.getElementById("preview-doc"))
+        .then(x => console.log("docx: finished"));
+        })
+      },
         async loadModels() {
             try {
                 const response = await fetch('/api/models')
@@ -406,7 +420,8 @@ createApp({
                 console.error('Word export error:', err);
                 this.error = 'Word export failed: ' + err.message;
             }
-        }
+        },
+  
     },
     watch: {
         selectedModel() {
