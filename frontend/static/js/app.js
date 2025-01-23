@@ -132,6 +132,8 @@ createApp({
                     this.loadPdf(file)
                 } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                     this.loadDoc(file)
+                } else if (file.type.startsWith('image/')) {
+                    this.loadImage(file)
                 } else {
                     console.warn('Unsupported file type:', file.type)
                     this.error = 'Unsupported file type for preview. You can still convert this file.'
@@ -169,6 +171,25 @@ createApp({
         async loadDoc(file) {
             docx.renderAsync(file, document.getElementById("file-preview"))
             .then(x => console.log("docx: finished"));
+        },
+        async loadImage(file) {
+            const container = document.getElementById('file-preview');
+            // Clear existing content
+            container.innerHTML = '';
+            
+            const img = document.createElement('img');
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.margin = '0 auto';
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            container.appendChild(img);
         },
         async renderPage(pageNumber) {
             const page = await this.pdfDoc.getPage(pageNumber);
