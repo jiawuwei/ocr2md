@@ -130,8 +130,11 @@ createApp({
                 }
                 if (file.type === 'application/pdf') {
                     this.loadPdf(file)
-                } else {
+                } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                     this.loadDoc(file)
+                } else {
+                    console.warn('Unsupported file type:', file.type)
+                    this.error = 'Unsupported file type for preview. You can still convert this file.'
                 }
             }
         },
