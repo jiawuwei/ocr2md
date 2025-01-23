@@ -2,10 +2,9 @@
 
 FileMind AI is an advanced document conversion tool that leverages AI technology to transform various document formats into Markdown or Word documents. It provides intelligent text recognition and formatting preservation, making it an ideal solution for document conversion and content extraction.
 
-![app](images/image3.png)
-![before convert](images/image2.png)
-![after convert](images/image-1.png)
-
+![alt text](README/image-3.png)
+![alt text](README/image-2.png)
+![alt text](README/image-4.png)
 ## Key Features
 
 ### Intelligent Document Processing
